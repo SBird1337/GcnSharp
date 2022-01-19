@@ -10,7 +10,7 @@ namespace GcnSharp.Constants
         public const Int32 DATA_PORT = 54970;
         public const uint AGB_CORE_FREQUENCY = 16777216;
 
-        private enum JoyCommand : byte
+        public enum JoyCommand : byte
         {
             JOY_POLL = 0x00,
             JOY_TRANS = 0x14,

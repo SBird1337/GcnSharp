@@ -66,10 +66,10 @@ namespace GcnSharp.Core
         }
 
         /// Sends a JOY_RECV request to the GBA, receives JOYSTAT
-        public byte RecvRequest(Stopwatch sw, NetworkStream clcokStream, NetworkStream dataStream, uint dataWord)
+        public byte RecvRequest(Stopwatch sw, NetworkStream clockStream, NetworkStream dataStream, uint dataWord)
         {
-            clcokStream.Write(GetTimeSlice(sw));
-            clcokStream.Flush();
+            clockStream.Write(GetTimeSlice(sw));
+            clockStream.Flush();
             DolphinRecvRequest req = DolphinRecvRequest.FromUInt(dataWord);
             dataStream.Write(req.Data);
             dataStream.Flush();
@@ -77,6 +77,30 @@ namespace GcnSharp.Core
             dataStream.Read(buffer, 0, 1);
             return buffer[0];
         }
+
+        public byte[] ReceiveBuffer(Stopwatch sw, NetworkStream clockStream, NetworkStream dataStream, int n)
+        {
+            byte[] outputBuffer = new byte[n];
+            int current = 0;
+            while(current < n)
+            {
+                DolphinTransResponse response = TransRequest(sw, clockStream, dataStream);
+                for(int i = 0; i < 4; ++i)
+                {
+                    if (current < n)
+                        outputBuffer[current] = response.TransData[i];
+                    current++;
+                }
+            }
+            RecvRequest(sw, clockStream, dataStream, 0); //checksum
+            return outputBuffer;
+        }
+
+        public void SendBuffer(Stopwatch sw, NetworkStream clockStrem, NetworkStream dataStream, byte[] buffer)
+        {
+            throw new NotImplementedException();
+        }
+
         private void HandleConnection(object args)
         {
             Array argArray = new object[2];
